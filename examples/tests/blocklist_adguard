@@ -1,0 +1,22 @@
+! This is a Comment and should be ignored
+! Entries snipped from https://raw.githubusercontent.com/ph00lt0/blocklists/master/blocklist.txt
+
+nos.nl##+js(cookie-remover, atidvisitor)
+||google.de^
+||statistiek.rijksoverheid.nl^$badfilter  # Not just tracking company
+^dl.clickmap.min.js^
+||rtcstats-server.jitsi.net^
+$removeparam=pid
+||privatestats.whatsapp.net^
+||crashlogs.whatsapp.net^
+||statslogger.rocket.persgroep.cloud^
+*.ffm.to##.privacy-notice-gdpr
+|http://example.org/
+||statistiek.digid.nl^
+||statistieken.groenlinks.nl^
+||stats.duo.rijkscloud.nl^
+||analytics.partijvoordedieren.nl^
+||stats.bluebillywig.com^
+@@||cdn.cookielaw.org^$domain=videoland.com # unbreak videoland
+
+! ...

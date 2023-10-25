@@ -1,0 +1,17 @@
+# This is a Comment and should be ignored
+# Entries snipped from https://raw.githubusercontent.com/ph00lt0/blocklists/master/blocklist.txt
+
+0.0.0.0 google.de
+
+0.0.0.0 statistiek.rijksoverheid.nl
+0.0.0.0 rtcstats-server.jitsi.net
+0.0.0.0 privatestats.whatsapp.net
+0.0.0.0 crashlogs.whatsapp.net
+0.0.0.0 statslogger.rocket.persgroep.cloud
+0.0.0.0 statistiek.digid.nl
+0.0.0.0 statistieken.groenlinks.nl
+0.0.0.0 stats.duo.rijkscloud.nl
+0.0.0.0 analytics.partijvoordedieren.nl
+0.0.0.0 stats.bluebillywig.com
+
+# ...
