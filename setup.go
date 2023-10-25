@@ -6,9 +6,11 @@ import (
 	"github.com/coredns/caddy"
 	"github.com/coredns/coredns/core/dnsserver"
 	"github.com/coredns/coredns/plugin"
+	clog "github.com/coredns/coredns/plugin/pkg/log"
 )
 
 var pluginName = "guard"
+var log = clog.NewWithPlugin(pluginName)
 
 func init() {
 	plugin.Register(pluginName, setup)
@@ -32,6 +34,7 @@ func setup(caddy *caddy.Controller) error {
 			Config: config,
 		}
 	})
+	log.Debug("Added plugin guard to server")
 
 	return nil
 }

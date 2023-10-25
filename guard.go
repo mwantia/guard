@@ -5,6 +5,7 @@ import (
 	"net"
 
 	"github.com/coredns/coredns/plugin"
+	"github.com/coredns/coredns/plugin/metrics"
 	"github.com/miekg/dns"
 )
 
@@ -27,6 +28,7 @@ func (g guard) ServeDNS(ctx context.Context, writer dns.ResponseWriter, response
 		if question.Qtype == dns.TypeA || question.Qtype == dns.TypeAAAA {
 
 			fqdn := dns.Fqdn(question.Name)
+			log.Debugf("Finding guard match for fqdn '%+v'", fqdn)
 
 			for _, list := range g.Config.Lists {
 				match, entry := list.IsMatch(fqdn)
@@ -35,6 +37,10 @@ func (g guard) ServeDNS(ctx context.Context, writer dns.ResponseWriter, response
 					answer := &dns.Msg{
 						Answer: CreateGuardAnswers(question, entry.Address),
 					}
+
+					log.Debugf("Match found in entry '%+v'", entry.Content)
+					metricsGuardRequestMatchCount.WithLabelValues(metrics.WithServer(ctx)).Inc()
+
 					answer.SetReply(response)
 					_ = writer.WriteMsg(answer)
 
@@ -56,12 +62,12 @@ func CreateGuardAnswers(question dns.Question, address net.IP) []dns.RR {
 	}
 
 	if header.Rrtype == dns.TypeAAAA {
-		/*return []dns.RR{
+		return []dns.RR{
 			&dns.AAAA{
 				Hdr:  header,
 				AAAA: net.IPv6zero,
 			},
-		}*/
+		}
 	}
 
 	return []dns.RR{

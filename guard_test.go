@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"log"
+	l "log"
 	"net"
 	"testing"
 
@@ -34,7 +34,7 @@ func TestGuard(tst *testing.T) {
 	}
 
 	buffer := &bytes.Buffer{}
-	log.SetOutput(buffer)
+	l.SetOutput(buffer)
 
 	ctx := context.TODO()
 	response := new(dns.Msg)
