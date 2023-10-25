@@ -12,7 +12,7 @@ import (
 var metricsGuardRequestMatchCount = promauto.NewCounterVec(prometheus.CounterOpts{
 	Namespace: plugin.Namespace,
 	Subsystem: pluginName,
-	Name:      "guard_request_match_total",
+	Name:      "request_match_total",
 	Help:      "Counter of guarded requests",
 }, []string{"server"})
 

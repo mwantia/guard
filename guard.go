@@ -28,7 +28,7 @@ func (g guard) ServeDNS(ctx context.Context, writer dns.ResponseWriter, response
 		if question.Qtype == dns.TypeA || question.Qtype == dns.TypeAAAA {
 
 			fqdn := dns.Fqdn(question.Name)
-			log.Debugf("Finding guard match for fqdn '%+v'", fqdn)
+			log.Infof("Finding guard match for fqdn '%+v'", fqdn)
 
 			for _, list := range g.Config.Lists {
 				match, entry := list.IsMatch(fqdn)
@@ -38,7 +38,7 @@ func (g guard) ServeDNS(ctx context.Context, writer dns.ResponseWriter, response
 						Answer: CreateGuardAnswers(question, entry.Address),
 					}
 
-					log.Debugf("Match found in entry '%+v'", entry.Content)
+					log.Infof("Match found in entry '%+v'", entry.Content)
 					metricsGuardRequestMatchCount.WithLabelValues(metrics.WithServer(ctx)).Inc()
 
 					answer.SetReply(response)
