@@ -2,7 +2,6 @@ package guard
 
 import (
 	"bufio"
-	"fmt"
 	"io"
 	"net"
 	"net/http"
@@ -11,14 +10,6 @@ import (
 	"time"
 
 	"github.com/miekg/dns"
-)
-
-type GuardType int
-
-const (
-	AdGuard GuardType = 1
-	Hosts   GuardType = 2
-	Regex   GuardType = 4
 )
 
 type ListType string
@@ -41,7 +32,7 @@ type GuardList struct {
 	ListType  ListType
 	Address   string
 	GuardType GuardType
-	Frequency int
+	Frequency time.Duration
 	Entries   []GuardEntry
 }
 
@@ -50,13 +41,13 @@ func (list *GuardList) Setup() bool {
 	if list.Refresh() {
 		if list.Frequency > 0 {
 
-			duration := time.Duration(list.Frequency) * time.Second
-			ticker := time.NewTicker(duration)
+			log.Info("Enabling refresh for list '", list.Address, "' with frequency '", list.Frequency, "'")
+			ticker := time.NewTicker(list.Frequency)
 
 			go func() {
 				for range ticker.C {
 
-					fmt.Println("Refreshing list:", list.Address)
+					log.Info("Refreshing list: '", list.Address, "'")
 					list.Refresh()
 				}
 			}()
@@ -97,7 +88,7 @@ func (list *GuardList) Refresh() bool {
 			entries := LoadEntriesFromFile(file, list.GuardType)
 			list.Entries = append(list.Entries, entries...)
 
-			fmt.Println("Read entries from", list.Address+"/"+f.Name(), ":", len(entries))
+			log.Info("Read entries from '", list.Address+"/"+f.Name(), "': '", len(entries), "'")
 		}
 
 	case File:
@@ -109,7 +100,7 @@ func (list *GuardList) Refresh() bool {
 		entries := LoadEntriesFromFile(file, list.GuardType)
 		list.Entries = append(list.Entries, entries...)
 
-		fmt.Println("Read entries from", list.Address, ":", len(entries))
+		log.Info("Read entries from '", list.Address, "': '", len(entries), "'")
 
 	case Url:
 		response, err := http.Get(list.Address)
@@ -121,7 +112,7 @@ func (list *GuardList) Refresh() bool {
 		entries := LoadEntriesFromFile(response.Body, list.GuardType)
 		list.Entries = append(list.Entries, entries...)
 
-		fmt.Println("Read entries from", list.Address, ":", len(entries))
+		log.Info("Read entries from '", list.Address, "': '", len(entries), "'")
 	}
 
 	return true

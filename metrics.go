@@ -14,6 +14,6 @@ var metricsGuardRequestMatchCount = promauto.NewCounterVec(prometheus.CounterOpt
 	Subsystem: pluginName,
 	Name:      "request_match_total",
 	Help:      "Counter of guarded requests",
-}, []string{"server"})
+}, []string{"server", "type"})
 
 var _ sync.Once

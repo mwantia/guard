@@ -25,10 +25,10 @@ func (g guard) ServeDNS(ctx context.Context, writer dns.ResponseWriter, response
 		question := response.Question[i]
 
 		// Only resolve A or AAAA requests for now
-		if question.Qtype == dns.TypeA || question.Qtype == dns.TypeAAAA {
+		if question.Qtype == dns.TypeA || question.Qtype == dns.TypeAAAA || question.Qtype == dns.TypeHTTPS {
 
 			fqdn := dns.Fqdn(question.Name)
-			log.Infof("Finding guard match for fqdn '%+v'", fqdn)
+			log.Debugf("Finding guard match for fqdn '%+v'", fqdn)
 
 			for _, list := range g.Config.Lists {
 				match, entry := list.IsMatch(fqdn)
@@ -38,8 +38,11 @@ func (g guard) ServeDNS(ctx context.Context, writer dns.ResponseWriter, response
 						Answer: CreateGuardAnswers(question, entry.Address),
 					}
 
-					log.Infof("Match found in entry '%+v'", entry.Content)
-					metricsGuardRequestMatchCount.WithLabelValues(metrics.WithServer(ctx)).Inc()
+					log.Debugf("Match found in entry '%+v'", entry.Content)
+
+					server := metrics.WithServer(ctx)
+					guard := list.GuardType.ToString()
+					metricsGuardRequestMatchCount.WithLabelValues(server, guard).Inc()
 
 					answer.SetReply(response)
 					_ = writer.WriteMsg(answer)
@@ -59,6 +62,7 @@ func CreateGuardAnswers(question dns.Question, address net.IP) []dns.RR {
 		Name:   question.Name,
 		Class:  question.Qclass,
 		Rrtype: question.Qtype,
+		Ttl:    14400, // 4 hours
 	}
 
 	if header.Rrtype == dns.TypeAAAA {
@@ -66,6 +70,15 @@ func CreateGuardAnswers(question dns.Question, address net.IP) []dns.RR {
 			&dns.AAAA{
 				Hdr:  header,
 				AAAA: net.IPv6zero,
+			},
+		}
+	} else if header.Rrtype == dns.TypeHTTPS {
+		return []dns.RR{
+			&dns.HTTPS{
+				SVCB: dns.SVCB{
+					Hdr:    header,
+					Target: "0.0.0.0",
+				},
 			},
 		}
 	}

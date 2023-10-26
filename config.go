@@ -1,8 +1,8 @@
 package guard
 
 import (
-	"strconv"
 	"strings"
+	"time"
 
 	"github.com/coredns/caddy/caddyfile"
 )
@@ -52,10 +52,14 @@ func ParseConfigList(caddy caddyfile.Dispenser, listType ListType, config *confi
 		address := caddy.Val()
 
 		if caddy.NextArg() {
-			guardType := GetGuardType(caddy.Val())
+			guardType, result := ParseGuardType(caddy.Val())
+			// Default type 'Adguard'
+			if !result {
+				guardType = AdGuard
+			}
 
 			if caddy.NextArg() {
-				frequency, err := strconv.Atoi(caddy.Val())
+				frequency, err := time.ParseDuration(caddy.Val())
 				if err != nil {
 					return empty, err
 				}
@@ -87,21 +91,4 @@ func ParseConfigList(caddy caddyfile.Dispenser, listType ListType, config *confi
 	}
 
 	return empty, nil
-}
-
-func GetGuardType(guard string) GuardType {
-	if len(guard) > 0 {
-		switch guard {
-		case "adguard":
-			return AdGuard
-
-		case "hosts":
-			return Hosts
-
-		case "regex":
-			return Regex
-		}
-	}
-
-	return 0
 }
