@@ -1,0 +1,15 @@
+version: '3.1'
+services:
+  coredns:
+    build: .
+    container_name: coredns
+    restart: on-failure
+    ports:
+      - '10053:53/udp'
+      - '8080:8080/tcp'
+      - '9253:9253/tcp'
+    volumes:
+      - './examples/Corefile:/coredns/Corefile'
+  redis:
+    image: redis:6.2-alpine
+    restart: on-failure

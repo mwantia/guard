@@ -1,6 +1,33 @@
+(default) {
+  metadata
+  log
+  errors
+}
+
+(global) {
+  health :8080
+  debug
+}
+
+(rcache) {
+  cache 60
+  redisc 600 {
+    endpoint redis:6379
+  }
+}
+
+(metrics) {
+  prometheus :9253
+}
+
 . {
+  import default
+  import global
+  import rcache
+  import metrics
+
   guard {
-    url https://raw.githubusercontent.com/ph00lt0/blocklists/master/blocklist.txt adguard 3600
+    url https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt adguard 3600
   }
 
   forward . 1.1.1.1 1.0.0.1
