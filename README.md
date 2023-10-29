@@ -1,4 +1,6 @@
-# coredns-guard
+# CoreDNS Guard Plugin
+
+## Configuration Example
 
 ```
 . {
@@ -9,6 +11,28 @@
   forward . 1.1.1.1 1.0.0.1
 }
 ```
+
+## Default Configuration
+
+### Default Refresh Frequency
+
+Config: `default_refresh_frequency` \
+Value:  `0s`
+
+### Default IPv4 Answer
+
+Config: `default_ipv4_answer` \
+Value:  `0.0.0.0`
+
+### Default IPv6 Answer
+
+Config: `default_ipv6_answer` \
+Value:  `::`
+
+### Next Or Failure
+
+Config: `next_or_failure` \
+Value:  `true`
 
 ## TO-DO
 

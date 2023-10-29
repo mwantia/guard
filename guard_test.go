@@ -17,6 +17,7 @@ import (
 func TestGuard(tst *testing.T) {
 	controller := caddy.NewTestController("dns", `
    	guard {
+			# Example lists
 			url "https://raw.githubusercontent.com/ph00lt0/blocklists/master/blocklist.txt" adguard 10s
 			file "./examples/lists/blocklist_hosts" hosts 10s
    	}

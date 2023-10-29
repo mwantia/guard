@@ -3,6 +3,7 @@ package guard
 import (
 	"context"
 	"net"
+	"strconv"
 
 	"github.com/coredns/coredns/plugin"
 	"github.com/coredns/coredns/plugin/metrics"
@@ -25,7 +26,7 @@ func (g guard) ServeDNS(ctx context.Context, writer dns.ResponseWriter, response
 		question := response.Question[i]
 
 		// Only resolve A or AAAA requests for now
-		if question.Qtype == dns.TypeA || question.Qtype == dns.TypeAAAA || question.Qtype == dns.TypeHTTPS {
+		if question.Qtype == dns.TypeA || question.Qtype == dns.TypeAAAA {
 
 			fqdn := dns.Fqdn(question.Name)
 			log.Debugf("Finding guard match for fqdn '%+v'", fqdn)
@@ -34,17 +35,25 @@ func (g guard) ServeDNS(ctx context.Context, writer dns.ResponseWriter, response
 				match, entry := list.IsMatch(fqdn)
 
 				if match {
+					address := entry.Address
+					if address == nil {
+						if question.Qtype == dns.TypeAAAA {
+
+							d := g.Config.Defaults["default_ipv4_answer"]
+							address = net.ParseIP(d)
+						} else if question.Qtype == dns.TypeA {
+
+							d := g.Config.Defaults["default_ipv6_answer"]
+							address = net.ParseIP(d)
+						}
+					}
+
 					answer := &dns.Msg{
-						Answer: CreateGuardAnswers(question, entry.Address),
+						Answer: CreateGuardAnswers(question, address),
 					}
 
 					log.Debugf("Match found in entry '%+v'", entry.Content)
-
-					server := metrics.WithServer(ctx)
-					guard := list.GuardType.ToString()
-					address := list.Address
-
-					metricsGuardRequestMatchCount.WithLabelValues(server, address, guard).Inc()
+					metricsGuardRequestMatchCount.WithLabelValues(metrics.WithServer(ctx), list.Address, list.GuardType.ToString()).Inc()
 
 					answer.SetReply(response)
 					_ = writer.WriteMsg(answer)
@@ -55,7 +64,12 @@ func (g guard) ServeDNS(ctx context.Context, writer dns.ResponseWriter, response
 		}
 	}
 
-	return plugin.NextOrFailure(g.Name(), g.Next, ctx, writer, response)
+	next, err := strconv.ParseBool(g.Config.Defaults["next_or_failure"])
+	if err != nil || next {
+		return plugin.NextOrFailure(g.Name(), g.Next, ctx, writer, response)
+	}
+
+	return dns.RcodeNameError, nil
 }
 
 func CreateGuardAnswers(question dns.Question, address net.IP) []dns.RR {

@@ -157,11 +157,10 @@ func LoadEntriesFromFile(reader io.Reader, guardType GuardType) []GuardEntry {
 					regex = true
 				}
 
-				address := net.IPv4zero
 				if strings.HasPrefix(data[0], "||") {
 
 					entries = append(entries, GuardEntry{
-						Address:   address,
+
 						Modifiers: modifiers,
 						Content:   content,
 						Exact:     false,
@@ -170,7 +169,6 @@ func LoadEntriesFromFile(reader io.Reader, guardType GuardType) []GuardEntry {
 				} else if strings.HasPrefix(data[0], "|") {
 
 					entries = append(entries, GuardEntry{
-						Address:   address,
 						Modifiers: modifiers,
 						Content:   content,
 						Exact:     true,
@@ -179,7 +177,6 @@ func LoadEntriesFromFile(reader io.Reader, guardType GuardType) []GuardEntry {
 				} else {
 
 					entries = append(entries, GuardEntry{
-						Address:   address,
 						Modifiers: modifiers,
 						Content:   content,
 						Exact:     true,
@@ -195,7 +192,6 @@ func LoadEntriesFromFile(reader io.Reader, guardType GuardType) []GuardEntry {
 					var content string
 					// Allow single lines without any ip defined
 					if len(data) == 1 {
-						address = net.IPv4zero
 						content = data[0]
 					} else {
 						address = net.ParseIP(data[0])
@@ -213,7 +209,6 @@ func LoadEntriesFromFile(reader io.Reader, guardType GuardType) []GuardEntry {
 				if !strings.HasPrefix(line, "#") {
 
 					entries = append(entries, GuardEntry{
-						Address: net.IPv4zero,
 						Content: line,
 						Exact:   false,
 						Regex:   true,

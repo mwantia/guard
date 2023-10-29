@@ -2,7 +2,6 @@
 ! Entries snipped from https://raw.githubusercontent.com/ph00lt0/blocklists/master/blocklist.txt
 
 nos.nl##+js(cookie-remover, atidvisitor)
-||google.de^
 ||statistiek.rijksoverheid.nl^$badfilter  # Not just tracking company
 ^dl.clickmap.min.js^
 ||rtcstats-server.jitsi.net^

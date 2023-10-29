@@ -8,36 +8,54 @@ import (
 )
 
 type config struct {
-	Lists []GuardList
+	Lists    []GuardList
+	Defaults map[string]string
 }
 
 func CreateConfig(caddy caddyfile.Dispenser) (*config, error) {
 	config := config{}
+	config.Defaults = map[string]string{
+		"default_refresh_frequency": "0s",
+		"default_ipv4_answer":       "0.0.0.0",
+		"default_ipv6_answer":       "::",
+		"next_or_failure":           "true",
+	}
+
 	var err error
 
 	for caddy.NextBlock() {
 		val := caddy.Val()
-		var list GuardList
+		_, found := config.Defaults[val]
 
-		if strings.EqualFold(val, "directory") {
-			list, err = ParseConfigList(caddy, Directory, &config)
+		if found {
 
-		} else if strings.EqualFold(val, "file") {
-			list, err = ParseConfigList(caddy, File, &config)
+			caddy.NextArg()
+			new := caddy.Val()
+			config.Defaults[val] = new
+		} else {
 
-		} else if strings.EqualFold(val, "url") {
-			list, err = ParseConfigList(caddy, Url, &config)
+			var list GuardList
 
-		}
+			if strings.EqualFold(val, "directory") {
+				list, err = ParseConfigList(caddy, Directory, &config)
 
-		if err != nil {
-			return nil, err
-		}
+			} else if strings.EqualFold(val, "file") {
+				list, err = ParseConfigList(caddy, File, &config)
 
-		if len(list.ListType) > 0 && len(list.Address) > 0 {
+			} else if strings.EqualFold(val, "url") {
+				list, err = ParseConfigList(caddy, Url, &config)
 
-			list.Setup()
-			config.Lists = append(config.Lists, list)
+			}
+
+			if err != nil {
+				return nil, err
+			}
+
+			if len(list.ListType) > 0 && len(list.Address) > 0 {
+
+				list.Setup()
+				config.Lists = append(config.Lists, list)
+			}
 		}
 	}
 
@@ -47,6 +65,11 @@ func CreateConfig(caddy caddyfile.Dispenser) (*config, error) {
 func ParseConfigList(caddy caddyfile.Dispenser, listType ListType, config *config) (GuardList, error) {
 	// Create empty entry for returns
 	empty := GuardList{}
+
+	defaultFrequency, err := time.ParseDuration(config.Defaults["default_refresh_frequency"])
+	if err != nil {
+		return empty, err
+	}
 
 	if caddy.NextArg() {
 		address := caddy.Val()
@@ -59,17 +82,17 @@ func ParseConfigList(caddy caddyfile.Dispenser, listType ListType, config *confi
 			}
 
 			if caddy.NextArg() {
-				frequency, err := time.ParseDuration(caddy.Val())
+				customFrequency, err := time.ParseDuration(caddy.Val())
 				if err != nil {
 					return empty, err
 				}
 
-				if frequency > 0 {
+				if customFrequency >= 0 {
 					return GuardList{
 						ListType:  listType,
 						Address:   address,
 						GuardType: guardType,
-						Frequency: frequency,
+						Frequency: customFrequency,
 					}, nil
 				}
 			}
@@ -78,7 +101,7 @@ func ParseConfigList(caddy caddyfile.Dispenser, listType ListType, config *confi
 				ListType:  listType,
 				Address:   address,
 				GuardType: guardType,
-				Frequency: 0,
+				Frequency: defaultFrequency,
 			}, nil
 		}
 
@@ -86,7 +109,7 @@ func ParseConfigList(caddy caddyfile.Dispenser, listType ListType, config *confi
 			ListType:  listType,
 			Address:   address,
 			GuardType: AdGuard,
-			Frequency: 0,
+			Frequency: defaultFrequency,
 		}, nil
 	}
 
