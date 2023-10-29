@@ -5,6 +5,7 @@
 ```
 . {
   guard {
+    ttl 120
     url https://raw.githubusercontent.com/ph00lt0/blocklists/master/blocklist.txt adguard 3600
   }
 
@@ -16,22 +17,27 @@
 
 ### Default Refresh Frequency
 
-Config: `default_refresh_frequency` \
+Config: `frequency` \
 Value:  `0s`
+
+### Default TTL Answer
+
+Config: `ttl` \
+Value:  `14400`
 
 ### Default IPv4 Answer
 
-Config: `default_ipv4_answer` \
+Config: `ipv4` \
 Value:  `0.0.0.0`
 
 ### Default IPv6 Answer
 
-Config: `default_ipv6_answer` \
+Config: `ipv6` \
 Value:  `::`
 
 ### Next Or Failure
 
-Config: `next_or_failure` \
+Config: `next` \
 Value:  `true`
 
 ## TO-DO

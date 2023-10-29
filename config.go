@@ -15,10 +15,11 @@ type config struct {
 func CreateConfig(caddy caddyfile.Dispenser) (*config, error) {
 	config := config{}
 	config.Defaults = map[string]string{
-		"default_refresh_frequency": "0s",
-		"default_ipv4_answer":       "0.0.0.0",
-		"default_ipv6_answer":       "::",
-		"next_or_failure":           "true",
+		"frequency": "0s",
+		"ipv4":      "0.0.0.0",
+		"ipv6":      "::",
+		"ttl":       "14400",
+		"next":      "true",
 	}
 
 	var err error
@@ -66,7 +67,7 @@ func ParseConfigList(caddy caddyfile.Dispenser, listType ListType, config *confi
 	// Create empty entry for returns
 	empty := GuardList{}
 
-	defaultFrequency, err := time.ParseDuration(config.Defaults["default_refresh_frequency"])
+	defaultFrequency, err := time.ParseDuration(config.Defaults["frequency"])
 	if err != nil {
 		return empty, err
 	}

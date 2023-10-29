@@ -39,17 +39,23 @@ func (g guard) ServeDNS(ctx context.Context, writer dns.ResponseWriter, response
 					if address == nil {
 						if question.Qtype == dns.TypeAAAA {
 
-							d := g.Config.Defaults["default_ipv4_answer"]
+							d := g.Config.Defaults["ipv4"]
 							address = net.ParseIP(d)
 						} else if question.Qtype == dns.TypeA {
 
-							d := g.Config.Defaults["default_ipv6_answer"]
+							d := g.Config.Defaults["ipv6"]
 							address = net.ParseIP(d)
 						}
 					}
 
+					d := g.Config.Defaults["ttl"]
+					ttl, err := strconv.ParseUint(d, 10, 32)
+					if err != nil {
+						ttl = 14400
+					}
+
 					answer := &dns.Msg{
-						Answer: CreateGuardAnswers(question, address),
+						Answer: CreateGuardAnswers(question, address, uint32(ttl)),
 					}
 
 					log.Debugf("Match found in entry '%+v'", entry.Content)
@@ -64,7 +70,7 @@ func (g guard) ServeDNS(ctx context.Context, writer dns.ResponseWriter, response
 		}
 	}
 
-	next, err := strconv.ParseBool(g.Config.Defaults["next_or_failure"])
+	next, err := strconv.ParseBool(g.Config.Defaults["next"])
 	if err != nil || next {
 		return plugin.NextOrFailure(g.Name(), g.Next, ctx, writer, response)
 	}
@@ -72,13 +78,13 @@ func (g guard) ServeDNS(ctx context.Context, writer dns.ResponseWriter, response
 	return dns.RcodeNameError, nil
 }
 
-func CreateGuardAnswers(question dns.Question, address net.IP) []dns.RR {
+func CreateGuardAnswers(question dns.Question, address net.IP, ttl uint32) []dns.RR {
 	// Create a records header based on the initial question
 	header := dns.RR_Header{
 		Name:   question.Name,
 		Class:  question.Qclass,
 		Rrtype: question.Qtype,
-		Ttl:    14400, // 4 hours
+		Ttl:    ttl, // 4 hours
 	}
 
 	if header.Rrtype == dns.TypeAAAA {
