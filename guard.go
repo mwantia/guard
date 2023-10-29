@@ -42,7 +42,9 @@ func (g guard) ServeDNS(ctx context.Context, writer dns.ResponseWriter, response
 
 					server := metrics.WithServer(ctx)
 					guard := list.GuardType.ToString()
-					metricsGuardRequestMatchCount.WithLabelValues(server, guard).Inc()
+					address := list.Address
+
+					metricsGuardRequestMatchCount.WithLabelValues(server, address, guard).Inc()
 
 					answer.SetReply(response)
 					_ = writer.WriteMsg(answer)

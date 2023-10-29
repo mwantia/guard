@@ -12,4 +12,5 @@ services:
       - './examples/Corefile:/coredns/Corefile'
   redis:
     image: redis:6.2-alpine
+    container_name: redis
     restart: on-failure

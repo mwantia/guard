@@ -27,7 +27,7 @@
   import metrics
 
   guard {
-    url https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt adguard 3600
+    url https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt adguard 24h
   }
 
   forward . 1.1.1.1 1.0.0.1

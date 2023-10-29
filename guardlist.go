@@ -205,7 +205,7 @@ func LoadEntriesFromFile(reader io.Reader, guardType GuardType) []GuardEntry {
 					entries = append(entries, GuardEntry{
 						Address: address,
 						Content: content,
-						Exact:   true,
+						Exact:   false,
 					})
 				}
 			case Regex:
